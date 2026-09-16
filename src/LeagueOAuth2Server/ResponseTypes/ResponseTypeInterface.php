@@ -12,7 +12,7 @@
 
 declare(strict_types=1);
 
-namespace MediaWiki\Extension\OAuth\LeagueOAuth2Server\ResponseType;
+namespace MediaWiki\Extension\OAuth\LeagueOAuth2Server\ResponseTypes;
 
 use League\OAuth2\Server\ResponseTypes\ResponseTypeInterface as LeagueResponseTypeInterface;
 

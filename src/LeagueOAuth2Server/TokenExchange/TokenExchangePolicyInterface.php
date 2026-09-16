@@ -2,6 +2,10 @@
 
 namespace MediaWiki\Extension\OAuth\LeagueOAuth2Server\TokenExchange;
 
+use MediaWiki\Extension\OAuth\LeagueOAuth2Server\TokenValidators\TokenValidatorInterface;
+use MediaWiki\Extension\OAuth\LeagueOAuth2Server\TokenIssuers\TokenIssuerInterface;
+use MediaWiki\Extension\OAuth\LeagueOAuth2Server\TokenValidators\TokenValidationResult;
+
 interface TokenExchangePolicyInterface {
 	/**
 	 * Checks if the value of subject_token_type is supported by this policy.
@@ -11,7 +15,7 @@ interface TokenExchangePolicyInterface {
 	/**
 	 * Give a validator that validates the tokens this policy accepts as subject tokens.
 	 */
-	public function getSubjectTokenValidator( string $subjectTokenType ): TokenValidator;
+	public function getSubjectTokenValidator( string $subjectTokenType ): TokenValidatorInterface;
 
 	/**
 	 * Does this exchange policy _require_ an actor_token to be present in the request?
@@ -26,7 +30,7 @@ interface TokenExchangePolicyInterface {
 	/**
 	 * Give a validator that validates the tokens this policy accepts as actor tokens.
 	 */
-	public function getActorTokenValidator( $actorTokenType ): TokenValidator;
+	public function getActorTokenValidator( $actorTokenType ): TokenValidatorInterface;
 
 	/**
 	 * If requested_token_type is not provided, this function is called to determine what type of token will be issued.
@@ -36,7 +40,7 @@ interface TokenExchangePolicyInterface {
 	/**
 	 * Give a TokenIssuer that issues the tokens this policy should give out.
 	 */
-	public function getTokenIssuer(string $requestedTokenType): TokenIssuer;
+	public function getTokenIssuer(string $requestedTokenType): TokenIssuerInterface;
 
 	/**
 	 * Determines if this request should actually be granted; This is the actual policy that determines who should receive tokens.
@@ -52,7 +56,7 @@ interface TokenExchangePolicyInterface {
 	 */
 	public function authorizeRequest(
 		TokenValidationResult $subjectToken,
-		TokenValidationResult $actorToken,
+		?TokenValidationResult $actorToken,
 		string $requestedTokenType,
 		// More parameters are probably needed...
 	): bool;

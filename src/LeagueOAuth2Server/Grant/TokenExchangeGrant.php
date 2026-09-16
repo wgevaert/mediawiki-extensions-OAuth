@@ -2,7 +2,16 @@
 
 namespace MediaWiki\Extension\OAuth\LeagueOAuth2Server\Grant;
 
+use DateInterval;
+use Psr\Http\Message\ServerRequestInterface;
 use League\OAuth2\Server\Grant\AbstractGrant;
+use League\OAuth2\Server\Entities\ClientEntityInterface;
+use League\OAuth2\Server\Exception\OAuthServerException;
+use MediaWiki\Extension\OAuth\LeagueOAuth2Server\TokenValidators\TokenValidationResult;
+use MediaWiki\Extension\OAuth\LeagueOAuth2Server\Repositories\TokenExchangePolicyRepositoryInterface;
+use MediaWiki\Extension\OAuth\LeagueOAuth2Server\ResponseTypes\ResponseTypeInterface;
+use League\OAuth2\Server\ResponseTypes\ResponseTypeInterface as LeagueResponseTypeInterface;
+use League\OAuth2\Server\RequestEvent;
 
 class TokenExchangeGrant extends AbstractGrant {
 	protected TokenExchangePolicyRepositoryInterface $tokenExchangePolicyRepository;
@@ -27,7 +36,7 @@ class TokenExchangeGrant extends AbstractGrant {
 	 */
 	public function respondToAccessTokenRequest(
 		ServerRequestInterface $request,
-		ResponseTypeInterface $responseType,
+		LeagueResponseTypeInterface $responseType,
 		DateInterval $accessTokenTTL
 	): ResponseTypeInterface {
 		$client = $this->validateAuthenticatedClient( $request );
@@ -39,8 +48,8 @@ class TokenExchangeGrant extends AbstractGrant {
 		$actorTokenData = $this->validateOptionalActorToken( $request, $policy );
 
 		$requestedTokenType = $this->getRequestParameter( 'requested_token_type', $request ) ?? $policy->determineRequestedTokenType();
-		if ( !$policy->authorize( $subjectTokenData, $actorTokenData, $requestedTokenType ) ) {
-			throw OAuthServerException::invalidRequest();
+		if ( !$policy->authorizeRequest( $subjectTokenData, $actorTokenData, $requestedTokenType ) ) {
+			throw OAuthServerException::accessDenied('you do not have access');
 		}
 		$newToken = $policy->getTokenIssuer(
 			$requestedTokenType
@@ -48,20 +57,20 @@ class TokenExchangeGrant extends AbstractGrant {
 			$accessTokenTTL,
 			$client,
 			$subjectTokenData->getUserId(),
-			$finalizedScopes,
+			$finalizedScopes ?? [], //TODO: finalize scopes
 			$actorTokenData?->getUserId(),
 			$request
 		);
 
-		$response->setAccessToken( $newToken );
-		$response->setTokenType( $requestedTokenType );
+		$responseType->setAccessToken( $newToken );
+		$responseType->setTokenType( $requestedTokenType );
 
-		return $response;
+		return $responseType;
 	}
 
-	protected function validateTokenExchangeRequest( ServerRequestInterface $request ): TokenExchangeRequestInterface {
+	protected function validateTokenExchangeRequest( ServerRequestInterface $request ): void /*POC: replaced with void TokenExchangeRequestInterface*/ {
 		$subjectToken = $this->getRequestParameter( 'subject_token', $request );
-		$subjectTokenType = $this->getRequestParameter( 'subject_token_type' $request );
+		$subjectTokenType = $this->getRequestParameter( 'subject_token_type', $request );
 
 		if ( $subjectToken === null ) {
 			$this->getEmitter()->emit(new RequestEvent(RequestEvent::USER_AUTHENTICATION_FAILED, $request));

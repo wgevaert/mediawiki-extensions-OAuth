@@ -1,6 +1,6 @@
 <?php
 
-namespace ...
+namespace MediaWiki\Extension\OAuth\LeagueOAuth2Server\TokenExchange;
 
 /**
  * Defines the token types mentioned in RFC 8693 section 3.

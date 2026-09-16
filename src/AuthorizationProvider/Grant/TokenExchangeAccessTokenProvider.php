@@ -1,9 +1,17 @@
 <?php
 
-namespace MediaWiki\Extension\OAuth\AuthorizationProvider\Grant\TokenExchange;
+namespace MediaWiki\Extension\OAuth\AuthorizationProvider\Grant;
 
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Extension\OAuth\Repository\AccessTokenRepository;
+use League\OAuth2\Server\CryptKey;
 use League\OAuth2\Server\Grant\GrantTypeInterface;
-use MediaWiki\Extension\OAuth\AuthorizationProvider\AccessTokenProvider;
+use MediaWiki\Extension\OAuth\LeagueOAuth2Server\Grant\TokenExchangeGrant;
+use MediaWiki\Extension\OAuth\LeagueOAuth2Server\Repositories\SimpleTokenExchangePolicyRepository;
+use MediaWiki\Extension\OAuth\LeagueOAuth2Server\Repositories\TokenExchangePolicyRepositoryInterface;
+use MediaWiki\Extension\OAuth\OAuthServices;
+use MediaWiki\Extension\OAuth\Pega\JwtToAccessTokenExchangePolicy;
+use MediaWiki\Extension\OAuth\AuthorizationProvider\AccessToken as AccessTokenProvider;
 
 /**
  * Provides access tokens for a client credentials grant.
@@ -13,28 +21,27 @@ class TokenExchangeAccessTokenProvider extends AccessTokenProvider {
 	 * @return GrantTypeInterface
 	 */
 	protected function getGrant(): GrantTypeInterface {
-		$grant = new TokenExchangeGrantWithCustomClaims();
 		$policyRepository = $this->getTokenExchangePolicyRepository();
-		$grant->setTokenExchangePolicyRepository( $policyRepository );
+		return new TokenExchangeGrant($policyRepository);
 		return $grant;
 	}
 
-	protected function getTokenExchangePolicyRepository(): TokenExchangePolicyRepository {
-                $oauthConfig = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig( 'mwoauth' );
+	protected function getTokenExchangePolicyRepository(): TokenExchangePolicyRepositoryInterface {
+		$oauthConfig = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig( 'mwoauth' );
+
                 // Private key to sign the token
                 $privateKey = new CryptKey(
-                        $this->config->get( 'OAuth2PrivateKey' ),
-                        $this->config->get( 'OAuth2Passphrase' )
+                        $oauthConfig->get( 'OAuth2PrivateKey' ),
+                        $oauthConfig->get( 'OAuth2Passphrase' )
                 );
-		$accessTokenRepo = OAuthServices::wrap( MediaWikiServices::getInstance() )->getAccessTokenRepository();
+		$accessTokenRepo = new AccessTokenRepository( $this->config->get( 'CanonicalServer' ) ); // OAuthServices::wrap( MediaWikiServices::getInstance() )->getAccessTokenRepository();
 
 		$policy = new JwtToAccessTokenExchangePolicy(
-	                $this->config->get('OAuthTokenExchangeJwtPublicKey'),
-	                $this->config->get('OAuthTokenExchangeJwtIssuer'),
-	                $this->config->get('OAuthTokenExchangeJwtAudience'),
+	                $oauthConfig->get('OAuthTokenExchangeJwtIssuer'),
+	                $oauthConfig->get('OAuthTokenExchangeJwtAudience'),
 			$privateKey,
 			$accessTokenRepo
 		);
-		return new SimpleTokenExchangePolicyRepository($policy)
+		return new SimpleTokenExchangePolicyRepository($policy);
 	}
 }

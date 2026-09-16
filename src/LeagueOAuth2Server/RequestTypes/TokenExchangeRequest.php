@@ -10,7 +10,7 @@
 
 declare(strict_types=1);
 
-namespace ...;
+namespace MediaWiki\Extension\OAuth\LeagueOAuth2Server\RequestTypes;
 
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\ScopeEntityInterface;

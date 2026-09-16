@@ -23,10 +23,11 @@ use Lcobucci\JWT\UnencryptedToken;
 use Lcobucci\JWT\Validation\Constraint\LooseValidAt;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
 use Lcobucci\JWT\Validation\RequiredConstraintsViolated;
-use League\OAuth2\Server\CryptKeyInterface;
+use League\OAuth2\Server\CryptKey;
 use League\OAuth2\Server\CryptTrait;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use League\OAuth2\Server\Repositories\AccessTokenRepositoryInterface;
+use MediaWiki\Extension\OAuth\LeagueOAuth2Server\TokenValidators\TokenValidationResult;
 use Psr\Clock\ClockInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use RuntimeException;
@@ -42,7 +43,7 @@ class AccessTokenValidator implements TokenValidatorInterface
 {
 	use CryptTrait;
 
-	protected CryptKeyInterface $publicKey;
+	protected CryptKey $publicKey;
 
 	private Configuration $jwtConfiguration;
 
@@ -53,7 +54,7 @@ class AccessTokenValidator implements TokenValidatorInterface
 	/**
 	 * Set the public key
 	 */
-	public function setPublicKey(CryptKeyInterface $key): void
+	public function setPublicKey(CryptKey $key): void
 	{
 		$this->publicKey = $key;
 
@@ -65,7 +66,16 @@ class AccessTokenValidator implements TokenValidatorInterface
 	 */
 	private function initJwtConfiguration(): void
 	{
-		$this->jwtConfiguration = Configuration::forSymmetricSigner(
+		        $this->jwtConfiguration = Configuration::forSymmetricSigner(
+            new Sha256(),
+            InMemory::plainText('')
+        );
+
+        $this->jwtConfiguration->setValidationConstraints(
+            new ValidAt(new SystemClock(new DateTimeZone(\date_default_timezone_get()))),
+            new SignedWith(new Sha256(), LocalFileReference::file($this->publicKey->getKeyPath()))
+        );
+/*		$this->jwtConfiguration = Configuration::forSymmetricSigner(
 			new Sha256(),
 			InMemory::plainText('empty', 'empty')
 		);
@@ -90,7 +100,7 @@ class AccessTokenValidator implements TokenValidatorInterface
 				new Sha256(),
 				InMemory::plainText($publicKeyContents, $this->publicKey->getPassPhrase() ?? '')
 			)
-		);
+		);*/
 	}
 
 	/**

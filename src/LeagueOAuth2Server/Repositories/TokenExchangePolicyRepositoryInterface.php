@@ -1,11 +1,13 @@
 <?php
 
-namespace MediaWiki\Extension\OAuth\LeagueOAuth2Server\Repositories; 
+namespace MediaWiki\Extension\OAuth\LeagueOAuth2Server\Repositories;
 
 use League\OAuth2\Server\Repositories\RepositoryInterface;
+use MediaWiki\Extension\OAuth\LeagueOAuth2Server\TokenExchange\TokenExchangePolicyInterface;
 use MediaWiki\Extension\OAuth\LeagueOAuth2Server\RequestTypes\TokenExchangeRequestInterface;
 
-interface TokenExchangePolicyReposityInterface extends RepositoryInterface {
+
+interface TokenExchangePolicyRepositoryInterface extends RepositoryInterface {
 	/**
 	 * Determines the token exchange policy to apply
 	 *
@@ -16,5 +18,5 @@ interface TokenExchangePolicyReposityInterface extends RepositoryInterface {
 	 * @throws OAuthServerException
 	 * @return TokenExchangePolicyInterface|null The policy to use, or null if no policy could be determined.
 	 */
-	public function getPolicyFromRequest( TokenExchangeRequestInterface $request ): ?TokenExchangePolicyInterface;
+	public function getPolicyFromRequest( ?TokenExchangeRequestInterface $request ): ?TokenExchangePolicyInterface;
 }

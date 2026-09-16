@@ -2,6 +2,10 @@
 
 namespace MediaWiki\Extension\OAuth\LeagueOAuth2Server\TokenExchange;
 
+use MediaWiki\Extension\OAuth\LeagueOAuth2Server\TokenIssuers\TokenIssuerInterface;
+use MediaWiki\Extension\OAuth\LeagueOAuth2Server\TokenIssuers\AccessTokenIssuer;
+use MediaWiki\Extension\OAuth\LeagueOAuth2Server\TokenExchange\TokenType;
+
 abstract class AbstractTokenExchangePolicy {
 	protected ?AccessTokenValidator $accessTokenValidator = null;
         private AccessTokenRepositoryInterface $accessTokenRepository;
@@ -31,9 +35,9 @@ abstract class AbstractTokenExchangePolicy {
 		return TokenType::ACCESS_TOKEN;
 	}
 
-	public function getTokenIssuer(): TokenIssuer {
+	public function getTokenIssuer(): TokenIssuerInterface {
 		$issuer = new AccessTokenIssuer;
-		$issuer->set...;
+		$issuer->setAccessTokenRepository( $this->accessTokenRepository );
 		return $issuer;
 	}
 

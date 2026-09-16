@@ -7,13 +7,14 @@ use League\OAuth2\Server\Exception\OAuthServerException;
 use MediaWiki\Extension\OAuth\AuthorizationProvider\Grant\AuthorizationCodeAccessTokens;
 use MediaWiki\Extension\OAuth\AuthorizationProvider\Grant\ClientCredentials;
 use MediaWiki\Extension\OAuth\AuthorizationProvider\Grant\RefreshToken;
-use MediaWiki\Exception\MWExceptionHandler;
+//use MediaWiki\Exception\MWExceptionHandler;
 use MediaWiki\Extension\OAuth\AuthorizationProvider\Grant\TokenExchangeAccessTokenProvider;
 use MediaWiki\Extension\OAuth\Entity\ClientEntity;
 use MediaWiki\Extension\OAuth\Response;
 use MWExceptionHandler;
 use Throwable;
 use Wikimedia\ParamValidator\ParamValidator;
+use Wikimedia\Message\MessageValue;
 
 /**
  * Handles the oauth2/access_token endpoint, which can be used after the user has returned from

@@ -2,10 +2,18 @@
 
 namespace MediaWiki\Extension\OAuth\LeagueOAuth2Server\TokenIssuers;
 
+use DateInterval;
+use DateTimeImmutable;
 use Psr\Http\Message\ServerRequestInterface;
+use League\OAuth2\Server\Entities\ClientEntityInterface;
+use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
+use League\OAuth2\Server\Exception\OAuthServerException;
+use League\OAuth2\Server\Repositories\AccessTokenRepositoryInterface;
+use League\OAuth2\Server\CryptKey;
 
-class AccessTokenIssuer implements TokenIssuer {
-    protected CryptKeyInterface $privateKey;
+class AccessTokenIssuer implements TokenIssuerInterface {
+    private const MAX_RANDOM_TOKEN_GENERATION_ATTEMPTS = 3;
+    protected CryptKey $privateKey;
 
     public function setAccessTokenRepository(AccessTokenRepositoryInterface $accessTokenRepository): void
     {
@@ -15,7 +23,7 @@ class AccessTokenIssuer implements TokenIssuer {
     /**
      * Set the private key
      */
-    public function setPrivateKey(CryptKeyInterface $privateKey): void
+    public function setPrivateKey(CryptKey $privateKey): void
     {
         $this->privateKey = $privateKey;
     }
@@ -28,12 +36,13 @@ class AccessTokenIssuer implements TokenIssuer {
      * @throws OAuthServerException
      * @throws UniqueTokenIdentifierConstraintViolationException
      */
-    protected function issueAccessToken(
+    public function issueToken(
         DateInterval $accessTokenTTL,
         ClientEntityInterface $client,
         string|null $userIdentifier,
         array $scopes = [],
-	?ServerWebRequest $request = null,
+	string|null $actorIdentifier = null,
+	?ServerRequestInterface $request = null,
     ): AccessTokenEntityInterface {
         $maxGenerationAttempts = self::MAX_RANDOM_TOKEN_GENERATION_ATTEMPTS;
 

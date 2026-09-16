@@ -23,7 +23,7 @@ use Lcobucci\JWT\UnencryptedToken;
 use Lcobucci\JWT\Validation\Constraint\LooseValidAt;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
 use Lcobucci\JWT\Validation\RequiredConstraintsViolated;
-use League\OAuth2\Server\CryptKeyInterface;
+use League\OAuth2\Server\CryptKey;
 use League\OAuth2\Server\CryptTrait;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use League\OAuth2\Server\Repositories\AccessTokenRepositoryInterface;
@@ -40,7 +40,7 @@ class TokenValidationResult
 	public function __construct( private string|null $userId ) {
 	}
 
-	public static function newFromValues(array $values) {
+	public static function fromValues(array $values) {
 		return new self(
 			$values['user_id'] ?? null,
 		);

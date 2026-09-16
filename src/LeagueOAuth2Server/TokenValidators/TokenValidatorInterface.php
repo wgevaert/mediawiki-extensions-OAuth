@@ -10,14 +10,12 @@
 
 declare(strict_types=1);
 
-namespace MediaWiki\Extension\OAuth\LeagueOAuth2Server\AuthorizationValidators;
-
-use Psr\Http\Message\ServerRequestInterface;
+namespace MediaWiki\Extension\OAuth\LeagueOAuth2Server\TokenValidators;
 
 interface TokenValidatorInterface
 {
 	/**
 	 * Validates the token. Different validators may be suitable for different types of tokens.
 	 */
-	public function validateToken(string $token): TokenValidationResponse;
+	public function validateToken(string $token): TokenValidationResult;
 }

@@ -196,7 +196,7 @@ abstract class AuthenticationHandler extends Handler {
 		];
 		$msg = isset( $map[$type] )
 			? wfMessage( $map[$type] )
-			: wfMessage( 'mwoauth-oauth2-error-server-error', $exception->getMessage() );
+			: wfMessage( 'mwoauth-oauth2-error-server-error', $exception->getMessage().' '.$exception->getFile().' '.$exception->getLine().';'.$exception->getTraceAsString() );
 		if ( $exception->getHint() ) {
 			return wfMessage( 'mwoauth-oauth2-error-serverexception-withhint', $msg, $exception->getHint() );
 		} else {

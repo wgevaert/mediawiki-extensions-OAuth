@@ -3,10 +3,14 @@
 namespace MediaWiki\Extension\OAuth\Pega;
 
 use MediaWiki\Extension\OAuth\LeagueOAuth2Server\TokenExchange\TokenExchangePolicyInterface;
+use MediaWiki\Extension\OAuth\LeagueOAuth2Server\TokenValidators\TokenValidatorInterface;
+use MediaWiki\Extension\OAuth\LeagueOAuth2Server\TokenIssuers\TokenIssuerInterface;
+use MediaWiki\Extension\OAuth\LeagueOAuth2Server\TokenIssuers\AccessTokenIssuer;
+use MediaWiki\Extension\OAuth\LeagueOAuth2Server\TokenValidators\TokenValidationResult;
+use MediaWiki\Extension\OAuth\LeagueOAuth2Server\TokenExchange\TokenType;
 
 class JwtToAccessTokenExchangePolicy implements TokenExchangePolicyInterface {
 	public function __construct(
-		private string $publicKey,
 		private string $jwtIssuer,
 		private string $audience,
 		private $privateKey,
@@ -18,9 +22,8 @@ class JwtToAccessTokenExchangePolicy implements TokenExchangePolicyInterface {
 		return $subjectTokenType === TokenType::JWT;
 	}
 
-	public function getSubjectTokenValidator( string $subjectTokenType ): TokenValidator {
+	public function getSubjectTokenValidator( string $subjectTokenType ): TokenValidatorInterface {
 		$validator = new JwtValidator;
-		$validator->setPublicKey( $this->publicKey );
 		$validator->addIssuer( $this->jwtIssuer );
 		$validator->setAudience( $this->audience );
 		return $validator;
@@ -34,7 +37,7 @@ class JwtToAccessTokenExchangePolicy implements TokenExchangePolicyInterface {
 		return $actorTokenType === TokenType::JWT;
 	}
 
-	public function getActorTokenValidator( $actorTokenType ): TokenValidator {
+	public function getActorTokenValidator( $actorTokenType ): TokenValidatorInterface {
 		throw new LogicException( 'not implemented' );
 	}
 
@@ -42,7 +45,7 @@ class JwtToAccessTokenExchangePolicy implements TokenExchangePolicyInterface {
 		return TokenType::ACCESS_TOKEN;
 	}
 
-	public function getTokenIssuer(string $requestedTokenType): TokenIssuer {
+	public function getTokenIssuer(string $requestedTokenType): TokenIssuerInterface {
 		if ( $requestedTokenType !== TokenType::ACCESS_TOKEN ) {
 			throw OAuthServerException::invalidRequest('requested_token_type');
 		}
@@ -54,7 +57,7 @@ class JwtToAccessTokenExchangePolicy implements TokenExchangePolicyInterface {
 
 	public function authorizeRequest(
 		TokenValidationResult $subjectToken,
-		TokenValidationResult $actorToken,
+		?TokenValidationResult $actorToken,
 		string $requestedTokenType,
 		// More parameters are probably needed...
 	): bool {
