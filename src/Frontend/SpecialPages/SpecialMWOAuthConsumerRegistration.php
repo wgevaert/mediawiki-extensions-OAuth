@@ -540,6 +540,7 @@ class SpecialMWOAuthConsumerRegistration extends SpecialPage {
 					$this->msg( 'mwoauth-oauth2-granttype-auth-code' )->escaped() => 'authorization_code',
 					$this->msg( 'mwoauth-oauth2-granttype-refresh-token' )->escaped() => 'refresh_token',
 					$this->msg( 'mwoauth-oauth2-granttype-client-credentials' )->escaped() => 'client_credentials',
+					$this->msg( 'mwoauth-oauth2-granttype-token-exchange' )->escaped() => ClientEntity::GRANT_TYPE_TOKEN_EXCHANGE,
 				], fn ( $grantType ) => in_array( $grantType, $this->getConfig()->get( 'OAuth2EnabledGrantTypes' ) ) ),
 				'required' => true,
 				'default' => [ 'authorization_code', 'refresh_token' ]

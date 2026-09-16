@@ -429,7 +429,8 @@ class SpecialMWOAuthManageConsumers extends SpecialPage {
 					$map = [
 						'authorization_code' => 'mwoauth-oauth2-granttype-auth-code',
 						'refresh_token' => 'mwoauth-oauth2-granttype-refresh-token',
-						'client_credentials' => 'mwoauth-oauth2-granttype-client-credentials'
+						'client_credentials' => 'mwoauth-oauth2-granttype-client-credentials',
+						ClientEntity::GRANT_TYPE_TOKEN_EXCHANGE => 'mwoauth-oauth2-granttype-token-exchange',
 					];
 					return isset( $map[$grant] ) ? $this->msg( $map[$grant] ) : '';
 				}, $consumer->getAllowedGrants() ) )
