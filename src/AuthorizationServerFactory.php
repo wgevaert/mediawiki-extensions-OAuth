@@ -8,6 +8,7 @@ use MediaWiki\Extension\OAuth\Repository\AccessTokenRepository;
 use MediaWiki\Extension\OAuth\Repository\ClaimStore;
 use MediaWiki\Extension\OAuth\Repository\ClientRepository;
 use MediaWiki\Extension\OAuth\Repository\ScopeRepository;
+use MediaWiki\Extension\OAuth\LeagueOAuth2Server\ResponseTypes\BearerTokenResponse;
 use MediaWiki\MediaWikiServices;
 
 class AuthorizationServerFactory {
@@ -63,7 +64,7 @@ class AuthorizationServerFactory {
 			new ScopeRepository(),
 			$this->privateKey,
 			$this->encryptionKey,
-			null,
+			new BearerTokenResponse,
 			new ClaimStore()
 		);
 	}
