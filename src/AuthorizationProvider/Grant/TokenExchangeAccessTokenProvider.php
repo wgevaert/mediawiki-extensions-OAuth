@@ -13,6 +13,28 @@ class TokenExchangeAccessTokenProvider extends AccessTokenProvider {
 	 * @return GrantTypeInterface
 	 */
 	protected function getGrant(): GrantTypeInterface {
-		return new TokenExchangeGrantWithCustomClaims();
+		$grant = new TokenExchangeGrantWithCustomClaims();
+		$policyRepository = $this->getTokenExchangePolicyRepository();
+		$grant->setTokenExchangePolicyRepository( $policyRepository );
+		return $grant;
+	}
+
+	protected function getTokenExchangePolicyRepository(): TokenExchangePolicyRepository {
+                $oauthConfig = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig( 'mwoauth' );
+                // Private key to sign the token
+                $privateKey = new CryptKey(
+                        $this->config->get( 'OAuth2PrivateKey' ),
+                        $this->config->get( 'OAuth2Passphrase' )
+                );
+		$accessTokenRepo = OAuthServices::wrap( MediaWikiServices::getInstance() )->getAccessTokenRepository();
+
+		$policy = new JwtToAccessTokenExchangePolicy(
+	                $this->config->get('OAuthTokenExchangeJwtPublicKey'),
+	                $this->config->get('OAuthTokenExchangeJwtIssuer'),
+	                $this->config->get('OAuthTokenExchangeJwtAudience'),
+			$privateKey,
+			$accessTokenRepo
+		);
+		return new SimpleTokenExchangePolicyRepository($policy)
 	}
 }
