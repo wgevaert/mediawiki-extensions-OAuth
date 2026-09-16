@@ -37,5 +37,16 @@ use function trim;
 
 class TokenValidationResult
 {
+	public function __construct( private string|null $userId ) {
+	}
 
+	public static function newFromValues(array $values) {
+		return new self(
+			$values['user_id'] ?? null,
+		);
+	}
+	
+	public function getUserId(): ?string {
+		return $this->userId;
+	}
 }
