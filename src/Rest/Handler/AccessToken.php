@@ -8,6 +8,7 @@ use MediaWiki\Exception\MWExceptionHandler;
 use MediaWiki\Extension\OAuth\AuthorizationProvider\Grant\AuthorizationCodeAccessTokenProvider;
 use MediaWiki\Extension\OAuth\AuthorizationProvider\Grant\ClientCredentialsAccessTokenProvider;
 use MediaWiki\Extension\OAuth\AuthorizationProvider\Grant\RefreshTokenAccessTokenProvider;
+use MediaWiki\Extension\OAuth\AuthorizationProvider\Grant\TokenExchangeAccessTokenProvider;
 use MediaWiki\Extension\OAuth\Entity\ClientEntity;
 use MediaWiki\Extension\OAuth\Response;
 use Throwable;
@@ -68,6 +69,7 @@ class AccessToken extends AuthenticationHandler {
 					ClientEntity::GRANT_TYPE_CLIENT_CREDENTIALS,
 					ClientEntity::GRANT_TYPE_AUTHORIZATION_CODE,
 					ClientEntity::GRANT_TYPE_REFRESH_TOKEN,
+					ClientEntity::GRANT_TYPE_TOKEN_EXCHANGE,
 				],
 				ParamValidator::PARAM_REQUIRED => true,
 				self::PARAM_DESCRIPTION => new MessageValue( 'mwoauth-rest-param-desc-grant_type' ),
@@ -113,7 +115,49 @@ class AccessToken extends AuthenticationHandler {
 				ParamValidator::PARAM_TYPE => 'string',
 				ParamValidator::PARAM_REQUIRED => false,
 				self::PARAM_DESCRIPTION => new MessageValue( 'mwoauth-rest-param-desc-code_verifier' ),
-			]
+			],
+			'resource' => [
+				self::PARAM_SOURCE => 'body',
+				ParamValidator::PARAM_TYPE => 'string',
+				ParamValidator::PARAM_REQUIRED => false,
+				self::PARAM_DESCRIPTION => new MessageValue( 'mwoauth-rest-param-desc-resource' ),
+			],
+			'audience' => [
+				self::PARAM_SOURCE => 'body',
+				ParamValidator::PARAM_TYPE => 'string',
+				ParamValidator::PARAM_REQUIRED => false,
+				self::PARAM_DESCRIPTION => new MessageValue( 'mwoauth-rest-param-desc-audience' ),
+			],
+			'requested_token_type' => [
+				self::PARAM_SOURCE => 'body',
+				ParamValidator::PARAM_TYPE => 'string',
+				ParamValidator::PARAM_REQUIRED => false,
+				self::PARAM_DESCRIPTION => new MessageValue( 'mwoauth-rest-param-desc-requested_token_type' ),
+			],
+			'subject_token' => [
+				self::PARAM_SOURCE => 'body',
+				ParamValidator::PARAM_TYPE => 'string',
+				ParamValidator::PARAM_REQUIRED => false,
+				self::PARAM_DESCRIPTION => new MessageValue( 'mwoauth-rest-param-desc-subject_token' ),
+			],
+			'subject_token_type' => [
+				self::PARAM_SOURCE => 'body',
+				ParamValidator::PARAM_TYPE => 'string',
+				ParamValidator::PARAM_REQUIRED => false,
+				self::PARAM_DESCRIPTION => new MessageValue( 'mwoauth-rest-param-desc-subject_token_type' ),
+			],
+			'actor_token' => [
+				self::PARAM_SOURCE => 'body',
+				ParamValidator::PARAM_TYPE => 'string',
+				ParamValidator::PARAM_REQUIRED => false,
+				self::PARAM_DESCRIPTION => new MessageValue( 'mwoauth-rest-param-desc-actor_token' ),
+			],
+			'actor_token_type' => [
+				self::PARAM_SOURCE => 'body',
+				ParamValidator::PARAM_TYPE => 'string',
+				ParamValidator::PARAM_REQUIRED => false,
+				self::PARAM_DESCRIPTION => new MessageValue( 'mwoauth-rest-param-desc-actor_token_type' ),
+			],
 		];
 	}
 
@@ -135,6 +179,7 @@ class AccessToken extends AuthenticationHandler {
 			ClientEntity::GRANT_TYPE_AUTHORIZATION_CODE => AuthorizationCodeAccessTokenProvider::class,
 			ClientEntity::GRANT_TYPE_CLIENT_CREDENTIALS => ClientCredentialsAccessTokenProvider::class,
 			ClientEntity::GRANT_TYPE_REFRESH_TOKEN => RefreshTokenAccessTokenProvider::class,
+			ClientEntity::GRANT_TYPE_TOKEN_EXCHANGE => TokenExchangeAccessTokenProvider::class,
 			default => false,
 		};
 	}
