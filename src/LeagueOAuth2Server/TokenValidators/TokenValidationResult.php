@@ -37,7 +37,7 @@ use function trim;
 
 class TokenValidationResult
 {
-	public function __construct( private string|null $userId ) {
+	public function __construct( private string|int|null $userId ) {
 	}
 
 	public static function fromValues(array $values) {
@@ -46,7 +46,7 @@ class TokenValidationResult
 		);
 	}
 	
-	public function getUserId(): ?string {
+	public function getUserId(): string|int|null {
 		return $this->userId;
 	}
 }

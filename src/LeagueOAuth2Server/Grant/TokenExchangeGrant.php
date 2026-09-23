@@ -51,6 +51,9 @@ class TokenExchangeGrant extends AbstractGrant {
 		if ( !$policy->authorizeRequest( $subjectTokenData, $actorTokenData, $requestedTokenType ) ) {
 			throw OAuthServerException::accessDenied('you do not have access');
 		}
+		$scopes = $this->validateScopes($this->getRequestParameter( 'scope', $request ));
+		// TODO: Actually finalize;
+		$finalizedScopes = $scopes;
 		$newToken = $policy->getTokenIssuer(
 			$requestedTokenType
 		)->issueToken(

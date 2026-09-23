@@ -2,6 +2,16 @@
 
 namespace MediaWiki\Extension\OAuth\Pega;
 
+use DateInterval;
+use DateTimeImmutable;
+use Psr\Http\Message\ServerRequestInterface;
+use League\OAuth2\Server\Entities\ClientEntityInterface;
+use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
+use League\OAuth2\Server\Exception\OAuthServerException;
+use League\OAuth2\Server\Repositories\AccessTokenRepositoryInterface;
+use League\OAuth2\Server\CryptKey;
+use MediaWiki\Extension\OAuth\Entity\ScopeEntity;
+use MediaWiki\Extension\OAuth\Backend\Utils;
 use MediaWiki\Extension\OAuth\LeagueOAuth2Server\TokenExchange\TokenExchangePolicyInterface;
 use MediaWiki\Extension\OAuth\LeagueOAuth2Server\TokenValidators\TokenValidatorInterface;
 use MediaWiki\Extension\OAuth\LeagueOAuth2Server\TokenIssuers\TokenIssuerInterface;
@@ -24,7 +34,7 @@ class JwtToAccessTokenExchangePolicy implements TokenExchangePolicyInterface {
 
 	public function getSubjectTokenValidator( string $subjectTokenType ): TokenValidatorInterface {
 		$validator = new JwtValidator;
-		$validator->addIssuer( $this->jwtIssuer );
+		$validator->setIssuer( $this->jwtIssuer );
 		$validator->setAudience( $this->audience );
 		return $validator;
 	}
@@ -49,7 +59,22 @@ class JwtToAccessTokenExchangePolicy implements TokenExchangePolicyInterface {
 		if ( $requestedTokenType !== TokenType::ACCESS_TOKEN ) {
 			throw OAuthServerException::invalidRequest('requested_token_type');
 		}
-		$issuer = new AccessTokenIssuer;
+		$issuer = new class extends AccessTokenIssuer {
+    public function issueToken(
+        DateInterval $accessTokenTTL,
+        ClientEntityInterface $client,
+        string|null $userIdentifier,
+        array $scopes = [],
+        string|null $actorIdentifier = null,
+        ?ServerRequestInterface $request = null,
+    ): AccessTokenEntityInterface {
+	    $user = Utils::getLocalUserFromCentralId($userIdentifier);
+	    $grants = array_map(fn(ScopeEntity $s): string =>$s->getIdentifier(), $scopes);
+	    $client->authorize($user, false, $grants);
+	    $token = parent::issueToken($accessTokenTTL, $client, $userIdentifier, $scopes, $actorIdentifier, $request );
+	    return $token;
+    }
+		};
 		$issuer->setAccessTokenRepository( $this->accessTokenRepository );
 		$issuer->setPrivateKey( $this->privateKey );
 		return $issuer;
